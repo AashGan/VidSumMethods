@@ -1,0 +1,42 @@
+{
+    "Grooming an Animal_1": {
+        "kendall": 0.3130580434667591,
+        "spearman": 0.41134990080026046
+    },
+    "Parade_3": {
+        "kendall": -0.004839190186956782,
+        "spearman": -0.0066449005048874535
+    },
+    "Bee Keeping_3": {
+        "kendall": 0.0954546917969703,
+        "spearman": 0.12889572206439595
+    },
+    "Bee Keeping_4": {
+        "kendall": 0.21632402396024952,
+        "spearman": 0.28708054801878513
+    },
+    "Vehicle Tire_4": {
+        "kendall": 0.21811569709755024,
+        "spearman": 0.2913718753135056
+    },
+    "Bike tricks_3": {
+        "kendall": 0.3091341701869116,
+        "spearman": 0.3905103067663845
+    },
+    "Bike tricks_4": {
+        "kendall": 0.03456180161981816,
+        "spearman": 0.04727116204284677
+    },
+    "Dog Show_3": {
+        "kendall": 0.13854962005501278,
+        "spearman": 0.19007454396972412
+    },
+    "Vehicle Unstuck_1": {
+        "kendall": 0.19400536929971018,
+        "spearman": 0.25494888038979646
+    },
+    "Vehicle Unstuck_2": {
+        "kendall": 0.27846128105005474,
+        "spearman": 0.36659010939330283
+    }
+}
