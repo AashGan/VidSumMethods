@@ -1,42 +1,42 @@
 {
-    "Grooming an Animal_2": {
-        "kendall": 0.22089158177802082,
-        "spearman": 0.2884017158349891
-    },
-    "Grooming an Animal_4": {
-        "kendall": 0.2062250694627003,
-        "spearman": 0.2690998807702752
-    },
-    "Grooming an Animal_5": {
-        "kendall": 0.21246361662110655,
-        "spearman": 0.282108053071098
+    "Making Sandwich_3": {
+        "kendall": 0.2819631675599677,
+        "spearman": 0.3677983116190989
     },
     "Making Sandwich_5": {
-        "kendall": 0.3029120719483277,
-        "spearman": 0.39515086816125233
+        "kendall": 0.32544975238004226,
+        "spearman": 0.42480153418002703
+    },
+    "Parkour_2": {
+        "kendall": 0.12150714384463593,
+        "spearman": 0.15927793445179778
     },
     "Parade_2": {
-        "kendall": 0.13003175810788578,
-        "spearman": 0.17108812203941867
+        "kendall": 0.15814828326946617,
+        "spearman": 0.20785016085445657
     },
-    "Parade_5": {
-        "kendall": 0.20817834492795678,
-        "spearman": 0.2703957900718484
+    "Parade_4": {
+        "kendall": 0.2869397142288379,
+        "spearman": 0.37859969053366205
     },
-    "Flash Mob_2": {
-        "kendall": -0.018088191798314657,
-        "spearman": -0.02227427834499683
+    "Bike tricks_5": {
+        "kendall": 0.28140381491668154,
+        "spearman": 0.3693646497405497
     },
-    "Flash Mob_4": {
-        "kendall": 0.11924324477212415,
-        "spearman": 0.15712274312171512
+    "Dog Show_2": {
+        "kendall": 0.14746968608368333,
+        "spearman": 0.19274091605731675
     },
-    "Flash Mob_5": {
-        "kendall": -0.01413195103133984,
-        "spearman": -0.019316516035071528
+    "Dog Show_4": {
+        "kendall": 0.2503704474907818,
+        "spearman": 0.3245898859216943
     },
-    "Vehicle Unstuck_4": {
-        "kendall": 0.14982928021916303,
-        "spearman": 0.2010453454292513
+    "Vehicle Unstuck_2": {
+        "kendall": 0.3297794524417369,
+        "spearman": 0.4268034350333716
+    },
+    "Vehicle Unstuck_3": {
+        "kendall": 0.02462705857754676,
+        "spearman": 0.032531978413332954
     }
 }

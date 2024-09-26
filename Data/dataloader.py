@@ -5,6 +5,8 @@ import numpy as np
 import json
 import os
 import torch.nn.functional as F
+from sklearn.model_selection import train_test_split
+
 #TODO Add the transforms in a different place 
 
 datasets_dict = {'googlenet':'Data\\original','open_clip':'Data\\open_clip','resnet':'Data\\resnet50','3dresnet':'Data\\3dresnet','videoMAE':'Data\\videoMAE'}
@@ -16,10 +18,18 @@ class VideoData(Dataset):
         self.dataset_dict = {}
         self.feature_reps = kwargs.get('feature_extractor','googlenet')
         splits_json = os.path.join(splits_dir,splits_json)
-
+        self.trainval = kwargs.get('trainval',False)
+        self.seed = kwargs.get('seed',default = 0)
         with open(splits_json) as f:
             data = json.loads(f.read())
-            self.all_datapoints = data[split_index][mode +'_keys']
+            if self.trainval:
+                if mode == 'train':
+                    self.all_datapoints = train_test_split(data[split_index][mode +'_keys'],random_state=self.seed)[0]
+                elif mode == 'test':
+                    self.all_datapoints = train_test_split(data[split_index]['train_keys'],random_state=self.seed)[1]
+            else:
+                self.all_datapoints = data[split_index][mode +'_keys']
+                
         self._create_data_dict(datasets_dict[self.feature_reps])
         if transforms:
             assert type(transforms) == list, "Ensure the transformations are given as a list"

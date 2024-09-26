@@ -1,42 +1,42 @@
 {
-    "Making Sandwich_4": {
-        "kendall": 0.11786786287272025,
-        "spearman": 0.15482758702845462
+    "Grooming an Animal_3": {
+        "kendall": 0.10603890026104217,
+        "spearman": 0.1413905323956816
     },
-    "Parkour_4": {
-        "kendall": 0.031103796897934764,
-        "spearman": 0.04398576545273521
+    "Grooming an Animal_4": {
+        "kendall": 0.2822298180273181,
+        "spearman": 0.3696880585503968
     },
-    "Parkour_5": {
-        "kendall": 0.07573860985510107,
-        "spearman": 0.09867804549410647
+    "Grooming an Animal_5": {
+        "kendall": 0.2663029472002421,
+        "spearman": 0.3472036493356007
     },
-    "Parade_4": {
-        "kendall": 0.1699964014202495,
-        "spearman": 0.2264618043418733
-    },
-    "Vehicle Tire_3": {
-        "kendall": 0.23636768269103534,
-        "spearman": 0.30638761913692375
+    "Parade_3": {
+        "kendall": 0.1884388648101311,
+        "spearman": 0.24674869014721165
     },
     "Flash Mob_1": {
-        "kendall": 0.07151759801703754,
-        "spearman": 0.09576863161239466
+        "kendall": 0.061761774169387315,
+        "spearman": 0.08178769631826013
     },
-    "Bee Keeping_5": {
-        "kendall": 0.016994082867134976,
-        "spearman": 0.023301225387513586
+    "Bee Keeping_1": {
+        "kendall": 0.2076015680031416,
+        "spearman": 0.2679714267191769
     },
-    "Bike tricks_1": {
-        "kendall": 0.13760284633522374,
-        "spearman": 0.17811802230076434
+    "Vehicle Tire_4": {
+        "kendall": 0.2116026824176803,
+        "spearman": 0.2814628384515495
     },
-    "Vehicle Tire_5": {
-        "kendall": -0.016527424539401616,
-        "spearman": -0.021968670593736122
+    "Bike tricks_3": {
+        "kendall": 0.2924212350411765,
+        "spearman": 0.3751433158703358
     },
-    "Vehicle Unstuck_3": {
-        "kendall": 0.05076412690953006,
-        "spearman": 0.06634811846735583
+    "Dog Show_1": {
+        "kendall": 0.1421913057702124,
+        "spearman": 0.18595593501333926
+    },
+    "Dog Show_5": {
+        "kendall": 0.0020933598567809387,
+        "spearman": 0.0004780577583158883
     }
 }
