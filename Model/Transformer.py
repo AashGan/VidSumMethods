@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from Model import model_dict , getPositionEncoding # Absolute positional encoding
+from .TransfromUtils import getPositionEncoding # Absolute positional encoding
 import math
 import torch.nn.functional as F
 

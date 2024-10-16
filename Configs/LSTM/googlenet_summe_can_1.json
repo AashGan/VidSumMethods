@@ -1,0 +1,10 @@
+{
+    "split": "summe_can_1.json",
+    "Model": "MLP",
+    "feature_extractor": "googlenet",
+    "reg": 1e-05,
+    "num_epochs": 50,
+    "learning_rate": 5e-05,
+    "loss_function": "MSE",
+    "data_aug": {}
+}

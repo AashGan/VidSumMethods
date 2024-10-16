@@ -177,7 +177,6 @@ def evaluate_f1score(outputs,dataset,names,data_name = 'summe'):
     for name  in names:
         cps = dataset[name]['change_points'][...]
         num_frames = dataset[name]['n_frames'][...]
-        nfps = dataset[name]['n_frame_per_seg'][...].tolist()
         positions = dataset[name]['picks'][...]
         user_summary = dataset[name]['user_summary'][...]
         all_user_summary.append(user_summary)
@@ -262,7 +261,6 @@ def eval_summary(outputs,dataset,names,data_name='summe'):
     for name  in names:
         cps = dataset[name]['change_points'][...]
         num_frames = dataset[name]['n_frames'][...]
-        nfps = dataset[name]['n_frame_per_seg'][...].tolist()
         positions = dataset[name]['picks'][...]
         user_summary = dataset[name]['user_summary'][...]
         all_user_summary.append(user_summary)
@@ -306,3 +304,47 @@ def change_key_names(F1_dict,Correlation_dict,dataset):
     else:
         print('Wrong Dataset')
     return F1_dict,Correlation_dict
+
+
+def correlation_single_pred(score,video_name,dataset,dataset_name='tvsum',downsample_gt=True):
+    "This compares the scores with a downsampled version of the ground truth"
+    kendall_spearman_scores = []
+    if dataset_name=="tvsum":
+        data = load_tvsum_mat('Utils//  ydata-tvsum50.mat')
+        video_number = int(video_name.split('_')[1])
+        all_user_summary = data[video_number-1]['user_anno'].T
+        pick = dataset[video_name]['picks']
+        all_correlations_tau = []
+        all_correlations_spearman = []
+        for user_summary in all_user_summary:
+            if downsample_gt:
+                down_sampled_summary = (user_summary/user_summary.max())[pick] # Change this to take the picks from which a certain frame was sampled from
+            else:
+                down_sampled_summary = (user_summary/user_summary.max())
+        
+            correlation_tau = kendalltau(-rankdata(down_sampled_summary),-rankdata(score))[0]
+            correlation_spear = spearmanr(down_sampled_summary,score)[0]
+            all_correlations_tau.append(correlation_tau)
+            all_correlations_spearman.append(correlation_spear)
+        kendall_spearman_scores.append(np.mean(all_correlations_tau))
+        kendall_spearman_scores.append(np.mean(all_correlations_spearman))
+    elif dataset_name =="summe":
+        user_summarie = dataset[video_name]['user_summary']
+        pick = dataset[video_name]['picks']
+        if downsample_gt:
+            averaged_downsampled_summary = np.average(user_summarie,axis=0)[::15]
+        else:
+            averaged_downsampled_summary = np.average(user_summarie,axis=0)
+        kendall_score = kendalltau(rankdata(averaged_downsampled_summary),rankdata(score))[0]
+        spearman_score = spearmanr(averaged_downsampled_summary,score)[0]
+        kendall_spearman_scores.append(np.mean(kendall_score))
+        kendall_spearman_scores.append(np.mean(spearman_score))
+    
+    return kendall_spearman_scores
+
+def knapsack_wrapper_with_rating(score,test_index,dataset,dataset_name):
+    shot_boundaries = dataset[test_index]['change_points'][...]
+    positions = dataset[test_index]['picks'][...]
+    n_frames = dataset[test_index]['n_frames'][...]
+    knapsack_pred = generate_summary_single(shot_boundaries,score,n_frames,positions)
+    return correlation_single_pred(knapsack_pred,test_index,dataset,dataset_name,False)

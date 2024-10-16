@@ -5,11 +5,9 @@ import numpy as np
 import json
 import os
 import torch.nn.functional as F
-from sklearn.model_selection import train_test_split
-
 #TODO Add the transforms in a different place 
 
-datasets_dict = {'googlenet':'Data\\original','open_clip':'Data\\open_clip','resnet':'Data\\resnet50','3dresnet':'Data\\3dresnet','videoMAE':'Data\\videoMAE'}
+datasets_dict = {'googlenet':'Data\\googlenet','open_clip':'Data\\open_clip','resnet':'Data\\resnet','3dresnet':'Data\\3dresnet','videoMAE':'Data\\videoMAE','pass':'Data\\pass','densenet':'Data\\densenet','resnext':'Data\\resnext','dinovit':'Data\\dinovit','vit':'Data\\vit'}
 splits_dir = 'Splits'
 class VideoData(Dataset):
     def __init__(self,mode,splits_json,split_index = 0,transforms = None,**kwargs):
@@ -18,18 +16,10 @@ class VideoData(Dataset):
         self.dataset_dict = {}
         self.feature_reps = kwargs.get('feature_extractor','googlenet')
         splits_json = os.path.join(splits_dir,splits_json)
-        self.trainval = kwargs.get('trainval',False)
-        self.seed = kwargs.get('seed',default = 0)
+
         with open(splits_json) as f:
             data = json.loads(f.read())
-            if self.trainval:
-                if mode == 'train':
-                    self.all_datapoints = train_test_split(data[split_index][mode +'_keys'],random_state=self.seed)[0]
-                elif mode == 'test':
-                    self.all_datapoints = train_test_split(data[split_index]['train_keys'],random_state=self.seed)[1]
-            else:
-                self.all_datapoints = data[split_index][mode +'_keys']
-                
+            self.all_datapoints = data[split_index][mode +'_keys']
         self._create_data_dict(datasets_dict[self.feature_reps])
         if transforms:
             assert type(transforms) == list, "Ensure the transformations are given as a list"
@@ -46,11 +36,12 @@ class VideoData(Dataset):
         for dataset in list_of_datasets:
             print(os.path.join(main_data_path,dataset))
             hdf = h5py.File(os.path.join(main_data_path,dataset),'r')
-            key = dataset.split('.')[0].split('_')[1]  # This should return the dataset
+            print(dataset)
+            key = dataset.split('.')[0].split('_')[-1]  # This should return the dataset
             print(key)
             self.dataset_dict[key] = hdf
         
-    def __getitem__(self,index):
+    def __getitem__(self,index,norm=True):
         dataset,video_index  = self.all_datapoints[index].split('/')
         
         features = self.dataset_dict[dataset][video_index]['features'][...]
@@ -58,7 +49,10 @@ class VideoData(Dataset):
         gtscore = self.dataset_dict[dataset][video_index]['gtscore'][...]
         features = torch.from_numpy(features)
         gtscore = torch.from_numpy(gtscore)
-        
+        if norm:
+            for i in range(len(features)):
+                features[i]/=features[i].norm()
+                
         if self.transforms and self.mode=='train':
             for transform in self.transforms:
                 if shot_bounds is not None:
@@ -70,6 +64,6 @@ class VideoData(Dataset):
             
             return features,video_index
         
-        return features, gtscore
+        return features, gtscore.to(torch.float)
 
             
