@@ -348,3 +348,17 @@ def knapsack_wrapper_with_rating(score,test_index,dataset,dataset_name):
     n_frames = dataset[test_index]['n_frames'][...]
     knapsack_pred = generate_summary_single(shot_boundaries,score,n_frames,positions)
     return correlation_single_pred(knapsack_pred,test_index,dataset,dataset_name,False)
+
+
+
+def calculate_metrics(true_boundaries, predicted_boundaries):
+    TP = len(set(true_boundaries) & set(predicted_boundaries))
+    FP = len(set(predicted_boundaries) - set(true_boundaries))
+    FN = len(set(true_boundaries) - set(predicted_boundaries))
+
+    precision = TP / (TP + FP) if (TP + FP) > 0 else 0
+    recall = TP / (TP + FN) if (TP + FN) > 0 else 0
+    f1_score = (2 * precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
+  
+
+    return precision, recall, f1_score
