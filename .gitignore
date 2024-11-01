@@ -2,3 +2,4 @@
 *.mat
 *.pyc
 *.npy
+*.pth
