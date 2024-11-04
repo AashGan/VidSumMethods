@@ -59,7 +59,10 @@ To run these experiments, follow the instructions given in the following noteboo
 
 The results obtained by re-running the notebooks may vary slightly from the original paper due to differences in the CUDA versions and pytorch version differences. To obtain the results reported from the paper. Please run the notebooks below with the weights/extracted features from our experiments
 
-Replication-Reported-Results.ipynb
+Replication-Reported-Results.ipynb ( Requirements 1 environment)
+Replication-Reported-Results-Fisher.ipynb (Requirements 2 environment)
 
-The existing weights, extracted features and predicted shot boundaries can be found [here]() 
+The existing weights, extracted features and predicted shot boundaries can be found [here](https://drive.google.com/file/d/19INY4tJTCjlE9P1oacx05-tm80JgWzIA/view?usp=drive_link) (shot boundaries) and [here](https://drive.google.com/file/d/14Uliuz_jsEMxhce699X2xY2yAQgRx9wZ/view?usp=sharing) (weights).
+
+Unzip the weights into "weights" directory and unzip the shot boundaries into the "Reported" directly. Please make these directories if they do not exist already 
 
