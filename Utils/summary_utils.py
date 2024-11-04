@@ -349,7 +349,7 @@ def knapsack_wrapper_with_rating(score,test_index,dataset,dataset_name):
     knapsack_pred = generate_summary_single(shot_boundaries,score,n_frames,positions)
     return correlation_single_pred(knapsack_pred,test_index,dataset,dataset_name,False)
 
-
+# Shot boundary F1 score, based off of code source : https://stackoverflow.com/questions/64860091/computing-macro-average-f1-score-using-numpy-pythonwithout-using-scikit-learn
 
 def calculate_metrics(true_boundaries, predicted_boundaries):
     TP = len(set(true_boundaries) & set(predicted_boundaries))
