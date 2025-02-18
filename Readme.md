@@ -1,68 +1,97 @@
-# Shots in the dark
+# Reproducibility of the KTS algorithm 
 
-This repository contains the code for the paper "An investigation into the inconsistency of shot boundaries and evaluation protocols within video summarization".
+This repository contains the code for the paper titled "Reproducibility study for shot boundary detection within the context of video summarization"
+## Hardware requirements
 
-# Setup
+To successfully run all the experiments for this paper. A minimum of 16 GB of RAM and 16GB of GPU VRAM is needed. Otherwise, there are risks of crashing and not finishing.
+We validated these experiments on the following hardware 
+## Setup
+We first provide the dataset links alongside where the dataset should be extracted
 
-
-## Datasets and Videos
-### Dataset
-Extract the content downloaded from this [link](https://drive.google.com/file/d/1GmEHfITTp_bDJ3l_mC9KnOsxD-onCrpn/view?usp=sharing) to the path "Data\googlenet"
-
-## Videos
+### Datasets and Videos
+#### TVSum and SumMe annotated dataset
+Extract the content downloaded from this [link](https://drive.google.com/drive/folders/1Y2pje5lRhwPolTmY4q3wsORgno92uPUi?usp=sharing) to the path "Data/original".
+#### Videos from TVSum and SumMe
 Extract the video content from this [link](https://drive.google.com/file/d/1z8u1VoXEUvPIWWZpX-pd8TJGrbydxOJM/view?usp=sharing) to the path "Videos" 
-
-
-# Experimental Setup
-For each of the experiment, two separate versions of python and two different virutal enviroments were used. 
-
-## Shot Boundary Consistency(Fisher) 
-
-This uses Python 3.10, for all the dependencies to be installed correctly set up a virtual environment with a version 3.10 Interpreter. Set this up using the following command
-
-```bash
-pip install -r requirements_2.txt
+#### Annotations for AutoShot dataset
+The annotations for the SHOT dataset is provided for in this repository. The original source can be found in the original [codebase](https://github.com/wentaozhu/AutoShot) provided by the authors
+#### Videos for the AutoShot dataset
+The videos of the test split of the autoshot dataset can be found in this [link](). The complete dataset can be found in the original [codebase](https://github.com/wentaozhu/AutoShot) provided by the Authors
+#### Features for both datasets
+The features extracted from our system can be found [here](https://drive.google.com/drive/folders/1hF5Ob9tIpzr47ZPj8FGnzHmmWinU3y4d?usp=sharing). Ensure that the file structure is maintained as follows after extraction:
+``` DataFeatures
+        |autoshot
+        |tvsum_summe
 ```
-This was done as the Fisher feature extractor used was provided by the SkImage Library.
+#### Paper reported Experimental Results
+The original results of the paper can be found in the repository
+## Experimental Setup for Reproduction
+We describe how our experimental set up can be reproduced in three parts. We strongly recommend a separate virutal environment where-ever specified. 
 
-To run these experiments, follow the instructions given in the following notebooks:
+### Feature Extraction 
+The feature extraction is done in two separate environments and python versions due to conflicts. 
 
-1. Running Fischer Extractor SumMe
-2. Runing Fischer Extractor TVsum
+#### Fisher Features
+This feature extractor used Python 3.10, with a virtual environment setup with requirements_Fisher.txt. 
+To run the Fisher Feature extractor for the TVSum and SumMe dataset, use the following command in your virtual environment
 
+````bash
+python run_fisher_feature_extractor.py
+````
 
-## Shot Boundary Consistency(CNNs) 
-This uses Python 3.7.9, for all the dependencies to be installed correctly set up a virtual environment with a version 3.7.9 Interpreter. Set this up using the following command
-```bash
-pip install -r requirements_1.txt
+#### Deep Learning Feature extractors
+This feature extractor used Python 3.7.9, with a virtual environment setup with requirements_DL.txt. 
+To run the Deep Learning Feature extractor for the TVSum and SumMe dataset, use the following command in your virtual environment
+
+````bash
+python run_feature_extractor_tvsum_summe.py
+````
+To run the Deep Learning Feature extractor for the Autoshot dataset, use the following command in your virtual environment
+
+````bash
+python extract_features_autoshot.py
+
+````
+### Shot boundary detection
+Prior to running each code, setup the virutal environment using the requirments_expts.txt file for Python 3.11.2
+To run the shot boundary detectors, first take the features we provide in the link or use the feature extraction code listed above
+Note: CUPY by default uses the first GPU that it sees. To set a specific GPU for each experiments Uncomment ```cnp.cuda.runtime.setDevice()``` and set it to the appropriate GPU that you intend to use based on how it is arranged in your system for EG ```cnp.cuda.runtime.setDevice(1)``` will use the second GPU on your system
+#### KTS
+##### TVSum and SumMe
+Run the following to obtain the TVSum and SumMe shot boundaries:
 ```
-This allows the following notebooks to be run: 
-
-1. Shot Boundary Consistency SumMe
-2. Shot Boundary Consistency TVsum
-
-## Post-Processing Evaluation Experiment
-
-This uses Python 3.7.9, for all the dependencies to be installed correctly set up a virtual environment with a version 3.7.9 Interpreter. Set this up using the following command. If the setup step has been done for the shot boundary(CNN) experiment, then this step can be skipped as the environment is shared between both. 
-
-```bash
-pip install -r requirements_1.txt
+python run_kts_tvsum_summe_cupy.py
 ```
+##### Autoshot
+Run the following to obtain the autoshot shot boundaries:
+```
+python run_kts_autoshot.py
+```
+#### PELT 
+##### Autoshot
+Run the following to obtain the autoshot shot boundaries:
+```
+python run_pelt_on_autoshot.py
+```
+### Results
+Please run the notebook ExperimentalResults.ipynb to obtain all the obtained results from the experiments.
 
-To run these experiments, follow the instructions given in the following notebooks:
+## Miscellanous Code
 
-1. Evaluation Divergence Video Summarization
-2. RandomSumMeScoring
+We've also provided the code for different aspects of the study
+
+### RunTime differences
+
+We demonstrate the run time differences between our implementation of the KTS algoritm compared to that of one available public implementation of the KTS algorithm. This can be seen in PerformanceComparisons.ipynb 
+
+### Summary generation
+
+We provide a notebook to generate summaries in notebook SummaryGeneration.ipynb 
+
+### Validate Fisher Features
+
+We also provide a notebook to validate the process followed for the fisher based feature extraction procedure. 
 
 
-# Exact paper reported results
 
-The results obtained by re-running the notebooks may vary slightly from the original paper due to differences in the CUDA versions and pytorch version differences. To obtain the results reported from the paper. Please run the notebooks below with the weights/extracted features from our experiments
-
-Replication-Reported-Results.ipynb ( Requirements 1 environment)
-Replication-Reported-Results-Fisher.ipynb (Requirements 2 environment)
-
-The existing weights, extracted features and predicted shot boundaries can be found [here](https://drive.google.com/file/d/19INY4tJTCjlE9P1oacx05-tm80JgWzIA/view?usp=drive_link) (shot boundaries) and [here](https://drive.google.com/file/d/14Uliuz_jsEMxhce699X2xY2yAQgRx9wZ/view?usp=sharing) (weights).
-
-Unzip the weights into "weights" directory and unzip the shot boundaries into the "Reported" directly. Please make these directories if they do not exist already 
 

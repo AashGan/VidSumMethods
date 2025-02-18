@@ -165,8 +165,9 @@ def cpd_nonlin(K, ncp, lmin=1, lmax=100000, backtrack=True, verbose=True,
 
 
 def kts(n_frames,features,vmax=1, frame_skip = 1):
-      """ Receives the frame features from the CNN to do the Shot division based on KTS #TODO need to see how exactly this functions
+      """ Receives the frame features from the CNN to do the Shot division based on KTS
       """
+      n_frames = len(features) * frame_skip -1
       seq_len = len(features)
       picks = np.arange(0, seq_len) * frame_skip
 

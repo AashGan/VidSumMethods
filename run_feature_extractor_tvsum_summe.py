@@ -1,4 +1,4 @@
-from extract_features import run_feature_extractor,run_feature_extractor_append
+from FeatExtractUtils.extract_features import run_feature_extractor
 import torch
 import torch.nn as nn
 import torchvision
@@ -9,8 +9,8 @@ import h5py
 import os
 
 def run():
-    dataset_path_tvsum = 'Videos\\tvsum'
-    dataset_path_summe = 'Videos\\summe'
+    dataset_path_tvsum = 'Videos/tvsum'
+    dataset_path_summe = 'Videos/summe'
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model = googlenet(weights = GoogLeNet_Weights.IMAGENET1K_V1)
     
@@ -40,7 +40,7 @@ def run():
     save_name = 'tvsum_features_densenet'
     run_feature_extractor(dataset_path_tvsum,submodel,0,preprocess,save_name)
     save_name = 'summe_features_densenet'
-    run_feature_extractor_append(dataset_path_summe,submodel,0,preprocess,save_name)
+    run_feature_extractor(dataset_path_summe,submodel,0,preprocess,save_name)
     del submodel
     gc.collect()
     torch.cuda.empty_cache()

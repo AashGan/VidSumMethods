@@ -5,3 +5,6 @@
 *.pth
 *.mp4
 *.zip
+*.hdf5
+venv
+*.avi

@@ -1,0 +1,6 @@
+cupy-cuda12x==13.3.0
+h5py==3.12.1
+pandas==2.2.3
+opencv-python==4.10.0.84
+numpy==1.26.4
+ruptures==1.1.9

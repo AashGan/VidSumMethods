@@ -1,59 +1,7 @@
 import numpy as np
-from scipy.stats import rankdata
-from scipy.stats import kendalltau, spearmanr
-import hdf5storage
-from .dicts import tvsum_video_dict,summe_video_dict
+import cv2
 
-def generate_summary(all_shot_bound, all_scores, all_nframes, all_positions):
-    """ Generate the automatic machine summary, based on the video shots; the frame importance scores; the number of
-    frames in the original video and the position of the sub-sampled frames of the original video.
 
-    :param list[np.ndarray] all_shot_bound: The video shots for all the -original- testing videos.
-    :param list[np.ndarray] all_scores: The calculated frame importance scores for all the sub-sampled testing videos.
-    :param list[np.ndarray] all_nframes: The number of frames for all the -original- testing videos.
-    :param list[np.ndarray] all_positions: The position of the sub-sampled frames for all the -original- testing videos.
-    :return: A list containing the indices of the selected frames for all the -original- testing videos.
-    """
-    all_summaries = []
-    for video_index in range(len(all_scores)):
-        # Get shots' boundaries
-        shot_bound = all_shot_bound[video_index]  # [number_of_shots, 2]
-        frame_init_scores = all_scores[video_index]
-        n_frames = all_nframes[video_index]
-        positions = all_positions[video_index]
-        # Compute the importance scores for the initial frame sequence (not the sub-sampled one)
-        frame_scores = np.zeros(n_frames, dtype=np.float32)
-        if positions.dtype != int:
-            positions = positions.astype(np.int32)
-        if positions[-1] != n_frames:
-            positions = np.concatenate([positions, [n_frames]])
-        for i in range(len(positions) - 1):
-            pos_left, pos_right = positions[i], positions[i + 1]
-            if i == len(frame_init_scores):
-                frame_scores[pos_left:pos_right] = 0
-            else:
-                frame_scores[pos_left:pos_right] = frame_init_scores[i]
-
-        # Compute shot-level importance scores by taking the average importance scores of all frames in the shot
-        shot_imp_scores = []
-        shot_lengths = []
-        for shot in shot_bound:
-            shot_lengths.append(shot[1] - shot[0] + 1)
-            shot_imp_scores.append((frame_scores[shot[0]:shot[1] + 1].mean()).item())
-
-        # Select the best shots using the knapsack implementation
-        final_shot = shot_bound[-1]
-        final_max_length = int((final_shot[1] + 1) * 0.15)
-        selected = knapSack(final_max_length, shot_lengths, shot_imp_scores, len(shot_lengths))
-
-        # Select all frames from each selected shot (by setting their value in the summary vector to 1)
-        summary = np.zeros(final_shot[1] + 1, dtype=np.int8)
-        for shot in selected:
-            summary[shot_bound[shot][0]:shot_bound[shot][1] + 1] = 1
-
-        all_summaries.append(summary)
-
-    return all_summaries
 
 
 def generate_summary_single(shot_bound,score,n_frames,positions,return_shot_info = False):
@@ -93,103 +41,13 @@ def generate_summary_single(shot_bound,score,n_frames,positions,return_shot_info
         return shot_lengths, shot_imp_scores,selected,summary
     return summary
 
-def load_tvsum_mat(filename):
-    data = hdf5storage.loadmat(filename, variable_names=['tvsum50'])
-    data = data['tvsum50'].ravel()
-    
-    data_list = []
-    for item in data:
-        video, category, title, length, nframes, user_anno, gt_score = item
-        
-        item_dict = {
-        'video': video[0, 0],
-        'category': category[0, 0],
-        'title': title[0, 0],
-        'length': length[0, 0],
-        'nframes': nframes[0, 0],
-        'user_anno': user_anno,
-        'gt_score': gt_score
-        }
-        
-        data_list.append((item_dict))
-    
-    return data_list
+
 
 # A modified evaluate correlation to pick out indices from a location 
 
-def evaluate_correlation(scores,dataset,video_names,dataset_name='tvsum'):
-    if dataset_name=="tvsum":
-        data = load_tvsum_mat('Utils//ydata-tvsum50.mat')
-        all_correlations_tau_split =[] 
-        all_correlations_spearman_split =[]
-        evaluation_dict = {}
-        for score,video_name in zip(scores,video_names):
-            video_number = int(video_name.split('_')[1])
-            all_user_summary = data[video_number-1]['user_anno'].T
-            all_correlations_tau = []
-            all_correlations_spearman = []
-            pick = dataset[video_name]['picks']
-            evaluation_dict[video_name] = {}
-            for user_summary in all_user_summary:
-                down_sampled_summary = (user_summary/user_summary.max())[pick] # Change this to take the picks from which a certain frame was sampled from 
-                correlation_tau = kendalltau(-rankdata(down_sampled_summary),-rankdata(score))[0]
-                correlation_spear = spearmanr(down_sampled_summary,score)[0]
-                all_correlations_tau.append(correlation_tau)
-                all_correlations_spearman.append(correlation_spear)
-            evaluation_dict[video_name]['kendall'] = np.mean(all_correlations_tau)
-            evaluation_dict[video_name]['spearman'] = np.mean(all_correlations_spearman)
-            all_correlations_tau_split.append(np.mean(all_correlations_tau))
-            all_correlations_spearman_split.append(np.mean(all_correlations_spearman))
-        evaluation_dict['Average_Kendall'] = np.mean(all_correlations_tau_split)
-        evaluation_dict['Average_Spearman'] = np.mean(all_correlations_spearman_split)
-        return evaluation_dict
-    elif dataset_name == "summe":
-        evaluation_dict = {}
-        all_correlations_tau_split =[] 
-        all_correlations_spearman_split =[]
-        for score,video_name in zip(scores,video_names):
-            evaluation_dict[video_name] = {}
-            user_summarie = dataset[video_name]['user_summary']
-            pick = dataset[video_name]['picks']
-            averaged_downsampled_summary = np.average(user_summarie,axis=0)[pick]
-            kendall_score = kendalltau(rankdata(averaged_downsampled_summary),rankdata(score))[0]
-            spearman_score = spearmanr(averaged_downsampled_summary,score)[0]
-            #print(f"The kendall and spear man coefficent for video {video_name} : {kendall_score} , {spearman_score}")
-            evaluation_dict[video_name]['kendall'] = kendall_score
-            evaluation_dict[video_name]['spearman'] = spearman_score
-            all_correlations_tau_split.append(kendall_score)
-            all_correlations_spearman_split.append(spearman_score)
-        #print(f"Overall Split Kendall Split: {np.mean(all_correlations_tau_split)} ")
-        #print(f"Overall Split Spearman Split: {np.mean(all_correlations_spearman_split)} ")
-        evaluation_dict['Average_Kendall'] = np.mean(all_correlations_tau_split)
-        evaluation_dict['Average_Spearman'] = np.mean(all_correlations_spearman_split)
-        return evaluation_dict
-    else:
-         print("Dataset incorrect")
-
-    return {}
 
 
-def evaluate_f1score(outputs,dataset,names,data_name = 'summe'):
-    eval_metric = 'avg' if data_name == 'tvsum' else 'max'
-    fms = []
-    all_user_summary, all_shot_bound, all_nframes, all_positions,all_scores = [], [], [], [] ,[]
-    for name  in names:
-        cps = dataset[name]['change_points'][...]
-        num_frames = dataset[name]['n_frames'][...]
-        positions = dataset[name]['picks'][...]
-        user_summary = dataset[name]['user_summary'][...]
-        all_user_summary.append(user_summary)
-        all_shot_bound.append(cps)
-        all_nframes.append(num_frames)
-        all_positions.append(positions)
-
-    machine_summaries = generate_summary(all_shot_bound, outputs, all_nframes, all_positions)
-    for machine_summary,user_summary,name in zip(machine_summaries,all_user_summary,names):
-        fm= evaluate_summary(machine_summary, user_summary, eval_metric)
-        #print(f"{name[0]} F1 : {fm}")
-        fms.append(fm)
-        return fms              
+          
      
       
 def knapSack(W, wt, val, n):
@@ -223,133 +81,15 @@ def knapSack(W, wt, val, n):
 
 	return selected
 
-def evaluate_summary(predicted_summary, user_summary, eval_method):
-    """ Compare the predicted summary with the user defined one(s).
-
-    :param ndarray predicted_summary: The generated summary from our model.
-    :param ndarray user_summary: The user defined ground truth summaries (or summary).
-    :param str eval_method: The proposed evaluation method; either 'max' (SumMe) or 'avg' (TVSum).
-    :return: The reduced fscore based on the eval_method
-    """
-    max_len = max(len(predicted_summary), user_summary.shape[1])
-    S = np.zeros(max_len, dtype=int)
-    G = np.zeros(max_len, dtype=int)
-    S[:len(predicted_summary)] = predicted_summary
-
-    f_scores = []
-    for user in range(user_summary.shape[0]):
-        G[:user_summary.shape[1]] = user_summary[user]
-        overlapped = S & G
-
-        # Compute precision, recall, f-score
-        precision = sum(overlapped)/sum(S)
-        recall = sum(overlapped)/sum(G)
-        if precision+recall == 0:
-            f_scores.append(0)
-        else:
-            f_scores.append(2 * precision * recall * 100 / (precision + recall))
-
-    if eval_method == 'max':
-        return max(f_scores)
-    else:
-        return sum(f_scores)/len(f_scores)
-
-def eval_summary(outputs,dataset,names,data_name='summe'):
-    eval_metric = 'avg' if data_name == 'tvsum' else 'max'
-    fms = []
-    all_user_summary, all_shot_bound, all_nframes, all_positions,all_scores = [], [], [], [] ,[]
-    for name  in names:
-        cps = dataset[name]['change_points'][...]
-        num_frames = dataset[name]['n_frames'][...]
-        positions = dataset[name]['picks'][...]
-        user_summary = dataset[name]['user_summary'][...]
-        all_user_summary.append(user_summary)
-        all_shot_bound.append(cps)
-        all_nframes.append(num_frames)
-        all_positions.append(positions)
-    machine_summaries = generate_summary(all_shot_bound, outputs, all_nframes, all_positions)
-    for machine_summary,user_summary,name in zip(machine_summaries,all_user_summary,names):
-        fm= evaluate_summary(machine_summary, user_summary, eval_metric)
-        fms.append(fm)
-    return fms
-
-def generate_f1_results(outputs,dataset,names,data_name='summe'):
-    all_f1_scores = eval_summary(outputs,dataset,names,data_name)
-    result_dict = {}
-    for i in range(len(outputs)):
-        result_dict[names[i]] = all_f1_scores[i]
-    result_dict['Average F1'] = np.mean(all_f1_scores)
-    return result_dict
-        
-          
-     
-def compute_average_results(f1_score_dict,correlation_dict):
-    average_f1_overall = np.mean([f1_score_dict[name] for name in list(f1_score_dict.keys())])
-    f1_score_dict['Overall Performance'] = average_f1_overall
-    average_kendall = np.mean([correlation_dict[name]['Kendall'] for name in list(correlation_dict.keys())])
-    average_spearman = np.mean([correlation_dict[name]['Spearman'] for name in list(correlation_dict.keys())])
-    correlation_dict['Overall Spearman'] = average_spearman
-    correlation_dict['Overall Kendall'] = average_kendall
-    return f1_score_dict,correlation_dict
-
-
-
-def change_key_names(F1_dict,Correlation_dict,dataset):
-    if dataset == 'tvsum':
-        F1_dict = {tvsum_video_dict[key]: F1_dict[key] for key in list(F1_dict.keys())}
-        Correlation_dict = {tvsum_video_dict[key]: Correlation_dict[key] for key in list(Correlation_dict.keys())}
-    elif dataset == 'summe':
-        F1_dict = {summe_video_dict[key]: F1_dict[key] for key in list(F1_dict.keys())}
-        Correlation_dict = {summe_video_dict[key]: Correlation_dict[key] for key in list(Correlation_dict.keys())}
-    else:
-        print('Wrong Dataset')
-    return F1_dict,Correlation_dict
-
-
-def correlation_single_pred(score,video_name,dataset,dataset_name='tvsum',downsample_gt=True):
-    "This compares the scores with a downsampled version of the ground truth"
-    kendall_spearman_scores = []
-    if dataset_name=="tvsum":
-        data = load_tvsum_mat('Utils//  ydata-tvsum50.mat')
-        video_number = int(video_name.split('_')[1])
-        all_user_summary = data[video_number-1]['user_anno'].T
-        pick = dataset[video_name]['picks']
-        all_correlations_tau = []
-        all_correlations_spearman = []
-        for user_summary in all_user_summary:
-            if downsample_gt:
-                down_sampled_summary = (user_summary/user_summary.max())[pick] # Change this to take the picks from which a certain frame was sampled from
-            else:
-                down_sampled_summary = (user_summary/user_summary.max())
-        
-            correlation_tau = kendalltau(-rankdata(down_sampled_summary),-rankdata(score))[0]
-            correlation_spear = spearmanr(down_sampled_summary,score)[0]
-            all_correlations_tau.append(correlation_tau)
-            all_correlations_spearman.append(correlation_spear)
-        kendall_spearman_scores.append(np.mean(all_correlations_tau))
-        kendall_spearman_scores.append(np.mean(all_correlations_spearman))
-    elif dataset_name =="summe":
-        user_summarie = dataset[video_name]['user_summary']
-        pick = dataset[video_name]['picks']
-        if downsample_gt:
-            averaged_downsampled_summary = np.average(user_summarie,axis=0)[::15]
-        else:
-            averaged_downsampled_summary = np.average(user_summarie,axis=0)
-        kendall_score = kendalltau(rankdata(averaged_downsampled_summary),rankdata(score))[0]
-        spearman_score = spearmanr(averaged_downsampled_summary,score)[0]
-        kendall_spearman_scores.append(np.mean(kendall_score))
-        kendall_spearman_scores.append(np.mean(spearman_score))
-    
-    return kendall_spearman_scores
-
-def knapsack_wrapper_with_rating(score,test_index,dataset,dataset_name):
-    shot_boundaries = dataset[test_index]['change_points'][...]
-    positions = dataset[test_index]['picks'][...]
-    n_frames = dataset[test_index]['n_frames'][...]
-    knapsack_pred = generate_summary_single(shot_boundaries,score,n_frames,positions)
-    return correlation_single_pred(knapsack_pred,test_index,dataset,dataset_name,False)
 
 # Shot boundary F1 score, based off of code source : https://stackoverflow.com/questions/64860091/computing-macro-average-f1-score-using-numpy-pythonwithout-using-scikit-learn
+
+def evaluate_f1_summaries(summary_1,summary_2):
+    overlap = summary_2 & summary_1
+    precision = overlap.sum()/summary_1.sum()
+    recall = overlap.sum()/summary_2.sum()
+    return 2*precision*recall/(precision+recall)
+
 
 def calculate_metrics(true_boundaries, predicted_boundaries):
     TP = len(set(true_boundaries) & set(predicted_boundaries))
@@ -362,3 +102,129 @@ def calculate_metrics(true_boundaries, predicted_boundaries):
   
 
     return precision, recall, f1_score
+
+
+
+def evaluate_scenes(gt_scenes, pred_scenes, return_mistakes=False, n_frames_miss_tolerance=2):
+    """
+    Adapted from: https://github.com/gyglim/shot-detection-evaluation
+    The original based on: http://imagelab.ing.unimore.it/imagelab/researchActivity.asp?idActivity=19
+
+    n_frames_miss_tolerance:
+        Number of frames it is possible to miss ground truth by, and still being counted as a correct detection.
+
+    Examples of computation with different tolerance margin:
+    n_frames_miss_tolerance = 0
+      pred_scenes: [[0, 5], [6, 9]] -> pred_trans: [[5.5, 5.5]]
+      gt_scenes:   [[0, 5], [6, 9]] -> gt_trans:   [[5.5, 5.5]] -> HIT
+      gt_scenes:   [[0, 4], [5, 9]] -> gt_trans:   [[4.5, 4.5]] -> MISS
+    n_frames_miss_tolerance = 1
+      pred_scenes: [[0, 5], [6, 9]] -> pred_trans: [[5.0, 6.0]]
+      gt_scenes:   [[0, 5], [6, 9]] -> gt_trans:   [[5.0, 6.0]] -> HIT
+      gt_scenes:   [[0, 4], [5, 9]] -> gt_trans:   [[4.0, 5.0]] -> HIT
+      gt_scenes:   [[0, 3], [4, 9]] -> gt_trans:   [[3.0, 4.0]] -> MISS
+    n_frames_miss_tolerance = 2
+      pred_scenes: [[0, 5], [6, 9]] -> pred_trans: [[4.5, 6.5]]
+      gt_scenes:   [[0, 5], [6, 9]] -> gt_trans:   [[4.5, 6.5]] -> HIT
+      gt_scenes:   [[0, 4], [5, 9]] -> gt_trans:   [[3.5, 5.5]] -> HIT
+      gt_scenes:   [[0, 3], [4, 9]] -> gt_trans:   [[2.5, 4.5]] -> HIT
+      gt_scenes:   [[0, 2], [3, 9]] -> gt_trans:   [[1.5, 3.5]] -> MISS
+    """
+
+    shift = n_frames_miss_tolerance / 2
+    gt_scenes = gt_scenes.astype(np.float32) + np.array([[-0.5 + shift, 0.5 - shift]])
+    pred_scenes = pred_scenes.astype(np.float32) + np.array([[-0.5 + shift, 0.5 - shift]])
+
+    gt_trans = np.stack([gt_scenes[:-1, 1], gt_scenes[1:, 0]], 1)
+    pred_trans = np.stack([pred_scenes[:-1, 1], pred_scenes[1:, 0]], 1)
+
+    i, j = 0, 0
+    tp, fp, fn = 0, 0, 0
+    fp_mistakes, fn_mistakes = [], []
+
+    while i < len(gt_trans) or j < len(pred_trans):
+        if j == len(pred_trans):
+            fn += 1
+            fn_mistakes.append(gt_trans[i])
+            i += 1
+        elif i == len(gt_trans):
+            fp += 1
+            fp_mistakes.append(pred_trans[j])
+            j += 1
+        elif pred_trans[j, 1] < gt_trans[i, 0]:
+            fp += 1
+            fp_mistakes.append(pred_trans[j])
+            j += 1
+        elif pred_trans[j, 0] > gt_trans[i, 1]:
+            fn += 1
+            fn_mistakes.append(gt_trans[i])
+            i += 1
+        else:
+            i += 1
+            j += 1
+            tp += 1
+
+    if tp + fp != 0:
+        p = tp / (tp + fp)
+    else:
+        p = 0
+
+    if tp + fn != 0:
+        r = tp / (tp + fn)
+    else:
+        r = 0
+
+    if p + r != 0:
+        f1 = (p * r * 2) / (p + r)
+    else:
+        f1 = 0
+
+    assert tp + fn == len(gt_trans)
+    assert tp + fp == len(pred_trans)
+
+    if return_mistakes:
+        return p, r, f1, (tp, fp, fn), fp_mistakes, fn_mistakes
+    return p, r, f1, (tp, fp, fn)
+
+
+
+
+def write_video_from_indices(video_path:str,selected_indices:list,save_path:str):
+    '''Takes a video, and writes it in using cv2
+    '''
+    selected_indices.sort()
+    cap = cv2.VideoCapture(video_path)
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    size = (int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) ),int(cap.get(cv2.CAP_PROP_FRAME_WIDTH) ))
+    print(size)
+    result = cv2.VideoWriter(save_path+'.avi',cv2.VideoWriter_fourcc(*'MJPG'),int(cap.get(cv2.CAP_PROP_FPS)),size)
+    for sub_frame in selected_indices:
+        cap.set(cv2.CAP_PROP_POS_FRAMES,sub_frame)
+        ret,frame = cap.read()
+        if not ret:
+            print(f"Error reading frame at index {sub_frame}")
+            continue
+        result.write(cv2.resize(frame,size))
+    cap.release()
+    print(f'result saved at: {save_path+".avi"}')
+
+
+def write_video_frames_from_indices(video_path:str,save_path:str):
+    '''Takes a video, and writes it in using cv2
+    '''
+    cap = cv2.VideoCapture(video_path)
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    selected_indices = np.random.choice(np.arange(total_frames),replace = False,size = 5)
+    selected_indices.sort()
+
+    size = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH) ),int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) ))
+    for sub_frame in selected_indices:
+        cap.set(cv2.CAP_PROP_POS_FRAMES,sub_frame)
+        ret,frame = cap.read()
+        if not ret:
+            print(f"Error reading frame at index {sub_frame}")
+            continue
+        cv2.imwrite(f'{save_path}/frame_{sub_frame}.png',cv2.resize(frame,size))
+    cap.release()
+    print(f'result saved at: {save_path+".avi"}')
+

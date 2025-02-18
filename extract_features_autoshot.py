@@ -1,4 +1,4 @@
-from extract_features import run_feature_extractor_subset
+from FeatExtractUtils.extract_features import run_feature_extractor
 import torch
 import torch.nn as nn
 import torchvision
@@ -9,7 +9,7 @@ import h5py
 import os
 import pickle
 def run():
-    dataset_path = 'C:\\Datasets\\video_shot_boundaries\\all_videos'
+    dataset_path = 'Videos/autoshot'
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     autoshot_keys = pickle.load(open('gt_scenes_dict_baseline_v2.pickle','rb'))
     autoshot_keys = [f'{key}.mp4' for key in list(autoshot_keys.keys())]
@@ -18,7 +18,7 @@ def run():
     preprocess = DenseNet121_Weights.IMAGENET1K_V1.transforms()
     submodel = nn.Sequential(*list(model.children())[:-1],nn.AdaptiveAvgPool2d(1)).to('cuda').eval()
     save_name = 'autoshot_feature_densenet'
-    run_feature_extractor_subset(dataset_path,autoshot_keys,submodel,0,preprocess,save_name)
+    run_feature_extractor(dataset_path,submodel,0,preprocess,save_name)
 
     del submodel
     gc.collect()
@@ -27,7 +27,7 @@ def run():
     preprocess =  GoogLeNet_Weights.IMAGENET1K_V1.transforms()
     submodel = nn.Sequential(*list(model.children())[:-2]).to(device).eval()
     save_name = 'autoshot_feature_googlenet'
-    run_feature_extractor_subset(dataset_path,autoshot_keys,submodel,0,preprocess,save_name)
+    run_feature_extractor(dataset_path,submodel,0,preprocess,save_name)
     del submodel
     gc.collect()
     torch.cuda.empty_cache()
@@ -36,7 +36,7 @@ def run():
     submodel = nn.Sequential(*list(model.children())[:-1])
     submodel.eval().to(device)
     save_name = 'autoshot_feature_resnet'
-    run_feature_extractor_subset(dataset_path,autoshot_keys,submodel,0,preprocess,save_name)
+    run_feature_extractor(dataset_path,submodel,0,preprocess,save_name)
     del submodel
     gc.collect()
     torch.cuda.empty_cache()   
@@ -52,7 +52,7 @@ def run():
         return feats
     submodel = vit_feat_extract
     save_name = 'autoshot_feature_vit'
-    run_feature_extractor_subset(dataset_path,autoshot_keys,submodel,0,preprocess,save_name)
+    run_feature_extractor(dataset_path,submodel,0,preprocess,save_name)
 
 if __name__ =="__main__":
     run()
