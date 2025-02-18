@@ -64,7 +64,7 @@ def run():
             video_path = os.path.join(video_dir_path,f'summe/video_{i+1}.mp4')
             features = popatov_feat_extract(video_path,'summe')
             h5out.create_dataset(f'video_{i+1}',data=features)
-    save_name = 'DatasetFeatures/tvsum_features_fisher'
+    save_name = 'DatasetFeatures/tvsum_summe/tvsum_features_fisher'
     video_dir_path = "Videos"
     with h5py.File(f'{save_name}.hdf5','w') as h5out:
         for i in range(50):
