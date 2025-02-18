@@ -13,12 +13,12 @@ def run():
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     autoshot_keys = pickle.load(open('gt_scenes_dict_baseline_v2.pickle','rb'))
     autoshot_keys = [f'{key}.mp4' for key in list(autoshot_keys.keys())]
-    
+    save_path = 'DatasetFeatures/autoshot'
     model = densenet121(weights =DenseNet121_Weights.IMAGENET1K_V1)
     preprocess = DenseNet121_Weights.IMAGENET1K_V1.transforms()
-    submodel = nn.Sequential(*list(model.children())[:-1],nn.AdaptiveAvgPool2d(1)).to('cuda').eval()
+    submodel = nn.Sequential(*list(model.children())[:-1],nn.AdaptiveAvgPool2d(1)).to(device).eval()
     save_name = 'autoshot_feature_densenet'
-    run_feature_extractor(dataset_path,submodel,0,preprocess,save_name)
+    run_feature_extractor(dataset_path,submodel,0,preprocess,os.path.join(save_path,save_name))
 
     del submodel
     gc.collect()
@@ -27,7 +27,7 @@ def run():
     preprocess =  GoogLeNet_Weights.IMAGENET1K_V1.transforms()
     submodel = nn.Sequential(*list(model.children())[:-2]).to(device).eval()
     save_name = 'autoshot_feature_googlenet'
-    run_feature_extractor(dataset_path,submodel,0,preprocess,save_name)
+    run_feature_extractor(dataset_path,submodel,0,preprocess,os.path.join(save_path,save_name))
     del submodel
     gc.collect()
     torch.cuda.empty_cache()
@@ -36,12 +36,12 @@ def run():
     submodel = nn.Sequential(*list(model.children())[:-1])
     submodel.eval().to(device)
     save_name = 'autoshot_feature_resnet'
-    run_feature_extractor(dataset_path,submodel,0,preprocess,save_name)
+    run_feature_extractor(dataset_path,submodel,0,preprocess,os.path.join(save_path,save_name))
     del submodel
     gc.collect()
     torch.cuda.empty_cache()   
     
-    vitb16 =  torchvision.models.vit_l_16(weights = torchvision.models.ViT_L_16_Weights).eval().to('cuda')
+    vitb16 =  torchvision.models.vit_l_16(weights = torchvision.models.ViT_L_16_Weights).eval().to(device)
     preprocess = torchvision.models.ViT_L_16_Weights.IMAGENET1K_V1.transforms()
     def vit_feat_extract(img):
         feats = vitb16._process_input(img)
@@ -52,7 +52,7 @@ def run():
         return feats
     submodel = vit_feat_extract
     save_name = 'autoshot_feature_vit'
-    run_feature_extractor(dataset_path,submodel,0,preprocess,save_name)
+    run_feature_extractor(dataset_path,submodel,0,preprocess,os.path.join(save_path,save_name))
 
 if __name__ =="__main__":
     run()
