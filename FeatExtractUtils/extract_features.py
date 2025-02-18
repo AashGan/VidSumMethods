@@ -66,7 +66,7 @@ def run_feature_extractor(video_paths:str,model:torch.nn.Module,downsample_rate:
             video_key = video.split('.')[0]
             print(video_key)
             video_path = os.path.join(video_paths,video)
-            features,_,_ = preprocesser_sum.run(video_path)
+            features,_ = preprocesser_sum.run(video_path)
             h5out.create_dataset(f'{video_key}',data = features)
 
     print(f'Features saved at : {save_name}')
