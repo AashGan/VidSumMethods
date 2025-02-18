@@ -59,9 +59,9 @@ class FeatureExtractor():
 
 def run_feature_extractor(video_paths:str,model:torch.nn.Module,downsample_rate:int,preprocess,save_name:str):
     feature_extractor = FeatureExtractor(model,preprocess)
-    preprocesser_sum = PreProcessorVidSum(feature_extractor,target_downsample=0)
+    preprocesser_sum = PreProcessorVidSum(feature_extractor,target_downsample=downsample_rate)
 
-    with h5py.File(save_name,'w') as h5out: 
+    with h5py.File(f'{save_name}.hdf5','w') as h5out: 
         for video in os.listdir(video_paths):
             video_key = video.split('.')[0]
             print(video_key)

@@ -57,7 +57,7 @@ def popatov_feat_extract(video_path,dataset = 'tvsum'):
 
 
 def run():
-    save_name = 'DatasetFeatures/summe_features_fisher'
+    save_name = 'DatasetFeatures/tvsum_summe/summe_features_fisher'
     video_dir_path = "Videos"
     with h5py.File(f'{save_name}.hdf5','w') as h5out:
         for i in range(25):

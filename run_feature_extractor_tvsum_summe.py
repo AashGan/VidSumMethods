@@ -11,7 +11,7 @@ import os
 def run():
     dataset_path_tvsum = 'Videos/tvsum'
     dataset_path_summe = 'Videos/summe'
-    save_path = 'DatasetFeature/tvsum_summe'
+    save_path = 'DatasetFeatures/tvsum_summe'
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model = googlenet(weights = GoogLeNet_Weights.IMAGENET1K_V1)
     
