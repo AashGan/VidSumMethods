@@ -12,7 +12,7 @@ We first provide the dataset links alongside where the dataset should be extract
 
 ### Datasets and Videos
 #### TVSum and SumMe annotated dataset
-Extract the content downloaded from this [link](https://drive.google.com/drive/folders/1Y2pje5lRhwPolTmY4q3wsORgno92uPUi?usp=sharing) to the path "Data/original".
+Extract the content downloaded from this [link](https://drive.google.com/file/d/1tCIU1HSsIJ27L0zuQBwSxBFcmksohXxT/view?usp=sharing) to the path "Data/original".
 #### Videos from TVSum and SumMe
 Extract the video content from this [link](https://drive.google.com/file/d/1z8u1VoXEUvPIWWZpX-pd8TJGrbydxOJM/view?usp=sharing) to the path "Videos/summe" and "Videos/tvsum" for each dataset.
 #### Annotations for AutoShot dataset
@@ -44,6 +44,7 @@ python run_fisher_feature_extractor.py
 ````
 
 #### Deep Learning Feature extractors
+Note: To set the appropriate GPU for your system plesae use: ``CUDA_VISIBLE_DEVICES=<Insert your number here> ``
 This feature extractor used Python 3.7.9, with a virtual environment setup with requirements_DL.txt. 
 To run the Deep Learning Feature extractor for the TVSum and SumMe dataset, use the following command in your virtual environment
 
@@ -62,7 +63,7 @@ Prior to running each code, setup the virtual environment using the requirments_
 It is an important point to note:
 ``cupy`` dependency must be adjusted according to the version of CUDA on your system. Adjust the requirements_expts accordingly 
 ``pip install cupy-cuda11x `` for cuda versions 11.2 to 11.8
-``pip install cupy-cuda12x ` for cuda versions 12 onwards.
+``pip install cupy-cuda12x`` for cuda versions 12 onwards.
 
 To run the shot boundary detectors, first take the features we provide in the link or use the feature extraction code listed above
 Note: CUPY by default uses the first GPU that it sees. To set a specific GPU for each experiments Uncomment ```cnp.cuda.runtime.setDevice()``` and set it to the appropriate GPU that you intend to use based on how it is arranged in your system for EG ```cnp.cuda.runtime.setDevice(1)``` will use the second GPU on your system
