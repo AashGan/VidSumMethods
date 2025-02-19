@@ -4,7 +4,9 @@ This repository contains the code for the paper titled "Reproducibility study fo
 ## Hardware requirements
 
 To successfully run all the experiments for this paper. A minimum of 16 GB of RAM and 16GB of GPU VRAM is needed. Otherwise, there are risks of crashing and not finishing.
-We validated these experiments on the following hardware 
+We validated these experiments on the following GPU hardware:
+RTX Quadro 6000 24GB
+
 ## Setup
 We first provide the dataset links alongside where the dataset should be extracted. All paths specified are within the root of the repository.
 
@@ -55,7 +57,13 @@ python extract_features_autoshot.py
 
 ````
 ### Shot boundary detection
-Prior to running each code, setup the virtual environment using the requirments_expts.txt file for Python 3.11.2
+Prior to running each code, setup the virtual environment using the requirments_expts.txt file for Python 3.11.2. 
+
+It is an important point to note:
+``cupy`` dependency must be adjusted according to the version of CUDA on your system. Adjust the requirements_expts accordingly 
+``pip install cupy-cuda11x `` for cuda versions 11.2 to 11.8
+``pip install cupy-cuda12x ` for cuda versions 12 onwards.
+
 To run the shot boundary detectors, first take the features we provide in the link or use the feature extraction code listed above
 Note: CUPY by default uses the first GPU that it sees. To set a specific GPU for each experiments Uncomment ```cnp.cuda.runtime.setDevice()``` and set it to the appropriate GPU that you intend to use based on how it is arranged in your system for EG ```cnp.cuda.runtime.setDevice(1)``` will use the second GPU on your system
 #### KTS
