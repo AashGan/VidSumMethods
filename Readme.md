@@ -94,7 +94,7 @@ We've also provided the code for different aspects of the study
 ### RunTime differences
 
 We demonstrate the run time differences between our implementation of the KTS algoritm compared to that of one available public implementation of the KTS algorithm. This can be seen in PerformanceComparisons.ipynb 
-
+We also show the results of this test in this [notebook](https://colab.research.google.com/drive/1h_6ZNpYuJZvKNj7XLTb3P2clRemTe6gw?usp=sharing) on googlecolab
 ### Summary generation
 
 We provide a notebook to generate summaries in notebook SummaryGeneration.ipynb 
