@@ -4,8 +4,12 @@ This repository contains the code for the paper titled "Reproducibility study fo
 ## Hardware requirements
 
 To successfully run all the experiments for this paper. A minimum of 16 GB of RAM and 16GB of GPU VRAM is needed. Otherwise, there are risks of crashing and not finishing.
-We validated these experiments on the following GPU hardware:
-RTX Quadro 6000 24GB
+We validated the each part of the code on the following GPU hardware:
+
+Feature extraction (Fisher and DL): 
+RTX 2060 6GB CUDA Version 11.7
+Shot Boundary Detection:
+RTX Quadro 6000 24GB CUDA version: 
 
 ## Setup
 We first provide the dataset links alongside where the dataset should be extracted. All paths specified are within the root of the repository.
@@ -21,7 +25,7 @@ The annotations for the SHOT dataset is provided for in this repository in the f
 The videos of the test split of the autoshot dataset can be found in this [link](https://drive.google.com/file/d/1LmcYisX6hiX2MCIapC2ClEe3FztSYPFH/view?usp=sharing). Extract to the path "Videos/autoshot". The complete dataset can be found in the original [codebase](https://github.com/wentaozhu/AutoShot) provided by the authors
 
 #### Features for both datasets
-The features extracted from our system can be found [here](https://drive.google.com/drive/folders/1hF5Ob9tIpzr47ZPj8FGnzHmmWinU3y4d?usp=sharing). Ensure that the file structure is maintained as follows after extraction:
+The features extracted from our system can be found [here](https://drive.google.com/file/d/1yEiZaXR1UjuVjLO54jTKUcR4EyTUTsEV/view?usp=sharing). Ensure that the file structure is maintained as follows after extraction:
 ``` 
 DataFeatures
         |autoshot
