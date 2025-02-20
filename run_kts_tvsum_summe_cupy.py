@@ -8,6 +8,8 @@ from Utils import kts_cupy
 feature_list = ['googlenet','resnet','densenet','vit','fisher']
 c_param = [0.8,1,2.5,5,7.5]
 def run_experiments(dataset,result_path='Results'):
+    """ Runs the experiment KTS forall combinations of features and c_params
+    """
     if not os.path.exists(f'{result_path}/kts/{dataset}'):
         os.makedirs(f'{result_path}/kts/{dataset}')
     result_path = f'{result_path}/kts/{dataset}'
@@ -17,7 +19,7 @@ def run_experiments(dataset,result_path='Results'):
             results_dict = {}
             for key in list(features.keys()):
                 feature = np.array([feat/LA.norm(feat) for feat in features[key]])
-                if feat == 'fisher':
+                if feat == 'fisher': # Set manually as only fisher for our experiments had downsampliing
                     cps,_,_ = kts_cupy(len(features[key]),feature,vmax = c,frame_skip=5)
                 else:
                     cps,_,_ = kts_cupy(len(features[key]),feature,vmax = c,frame_skip=1)

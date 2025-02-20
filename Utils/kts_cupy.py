@@ -3,8 +3,15 @@ import numpy as np
 
 # This should have calc scatters, one of two KTS functions
 
-def cpd_nonlin_cupy(J,ncp,lmax=100000,backtrack = True):
-    "Scatter matrix is assumed to be precomputed"
+def cpd_nonlin_cupy(J:cnp.array,ncp:int,lmax:int=100000,backtrack:bool = True):
+    """ Inputs: 
+    J: Scatter/ Variance Matrix
+    ncp: The number of change points to be detected
+    lmax: The maximum length of a sequence
+    backtrack:
+    Updated Function which computes the Change points using CUDA accelaration. 
+    Returns Cps: nd.array Change points of the signal, Scores: Final score matrix"""
+    
     m = ncp
     lmin = 1 # Code is yet to be made for any minimum length/maximum length
     (n, n1) = J.shape
@@ -18,10 +25,10 @@ def cpd_nonlin_cupy(J,ncp,lmax=100000,backtrack = True):
     else:
         p = None
     for k in range(1,m+1):
-        c = J[k:,k:] + I[k-1,k:n].reshape(-1,1)
-        I[k,k+1:I.shape[1]] = cnp.amin(c,axis=0)
+        c = J[k:,k:] + I[k-1,k:n].reshape(-1,1) # Compute states for next iteration for dynamic programming solver
+        I[k,k+1:I.shape[1]] = cnp.amin(c,axis=0) # Update states based on minimum value alongside each row
         if backtrack:
-            p[k,k+1:] = cnp.argmin(c,axis=0).get() + k
+            p[k,k+1:] = cnp.argmin(c,axis=0).get() + k # Backtracking only done when index of change-points need to be estimated. 
 
     cps = np.zeros(m, dtype=int)
     if backtrack:
@@ -34,7 +41,7 @@ def cpd_nonlin_cupy(J,ncp,lmax=100000,backtrack = True):
     return cps,I
 
 
-def calc_scatters(K):
+def calc_scatters(K:np.ndarray):
     """
     Calculate scatter matrix:
     scatters[i,j] = {scatter of the sequence with starting frame i and ending frame j}
@@ -65,7 +72,17 @@ def calc_scatters(K):
     return scatters
 
 
-def cpd_auto_cupy(K,ncp,vmax,desc_rate=1,**kwargs):
+def cpd_auto_cupy(K:np.ndarray,ncp:int,vmax:int,desc_rate:int=1,**kwargs):
+    """ 
+    K: the Kernel Matrix
+    ncp: Number of change-points
+    vmax: regularization strength applied to the KTS
+    desc_rate: frame skip rate 
+    Main body of the KTS function;
+    First calls Non-lin without back tracking to determine the ideal number of change points.
+    Then calls Non-lin a second time with the best change-points to determine the indices at which best changes occur
+    returns cps: Change points of the signal, scores of best change 
+    """
 
     K = calc_scatters(K)
     (_, scores) = cpd_nonlin_cupy(cnp.asarray(K), ncp, backtrack=False)
@@ -87,7 +104,14 @@ def cpd_auto_cupy(K,ncp,vmax,desc_rate=1,**kwargs):
     return cps,scores2
 
 
-def kts_cupy(n_frames,features,vmax=1, frame_skip = 1):
+def kts_cupy(n_frames:int,features:np.ndarray,vmax:int=1, frame_skip:int = 1):
+    """
+    n_frames: Number of frames in the video sequence
+    features: Sequence of features extracted from the video 
+    vmax: regularization strength of the dynamic solver
+    frame_skip: Number of frames to offset predictions by to get back the original indices
+    Wrapper function for the KTS process
+    """
     n_frames = len(features) * frame_skip 
     seq_len = len(features)-1
     picks = np.arange(0, seq_len) * frame_skip

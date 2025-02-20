@@ -3,8 +3,20 @@ import cv2
 
 
 
+# Code adapted from: https://github.com/e-apostolidis/PGL-SUM/blob/master/evaluation/generate_summary.py
+def generate_summary_single(shot_bound:list,score:np.ndarray,n_frames:int,positions:int,return_shot_info:bool = False):
+    """ Input:
+        shot_bound: the shot boundaries as a list of lists
+        score : frame-wise relevance scores of the video
+        n_frames: number of frames in the video
+        positions: the indices 
+        return_shot_info: Return details of shots if true
+        Output:
+        shot_lengths: length of each shot
+        shot_imp_scores: The importance scores assigned to each shot
+        summary: 0/1 array of all selected frames
 
-def generate_summary_single(shot_bound,score,n_frames,positions,return_shot_info = False):
+    """
     frame_init_scores = score
     frame_scores = np.zeros(n_frames, dtype=np.float32)
     if positions.dtype != int:
@@ -46,7 +58,7 @@ def generate_summary_single(shot_bound,score,n_frames,positions,return_shot_info
 # A modified evaluate correlation to pick out indices from a location 
 
 
-
+# link: https://github.com/wulfebw/algorithms/blob/master/scripts/dynamic_programming/knapsack.py
           
      
       

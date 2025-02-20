@@ -108,7 +108,9 @@ We provide a notebook to generate summaries in notebook SummaryGeneration.ipynb
 We also provide a notebook to validate the process followed for the fisher based feature extraction procedure. 
 
 
-# Other important details
-
+## Other important details
+### Additional experimental details
+#### Deep Learning feature pre-processing
+For this work we followed the pre-proccessing strategy specifically used for inference in the model described in the original documentation. This can viewed for further information here 
 Some of the videos in the autoshot test split were missing from the video as pointed in this [link](https://github.com/wentaozhu/AutoShot/issues/6) as the original authors did not provide it 
 
